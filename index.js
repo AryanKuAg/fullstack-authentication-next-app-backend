@@ -1,27 +1,27 @@
-// import { ApolloServer } from '@apollo/server';
-// import { startStandaloneServer } from '@apollo/server/standalone';
-// import { typeDefs } from './schema.js';
-// import {getClient} from "./config/database.js"
+// Imports
+require('dotenv').config();
+const express = require('express');
+const app = express();
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const {connectToMongoDB} = require('./config/database')
 
+// Middlewares
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(cors());
+app.use(cookieParser());
 
-// const resolvers = {
-//   Query: {
-//     users: async function () {
-//       const usersCollection = getClient()?.db('users_db').collection('users');
-//       const users = await usersCollection.find({});
-//       return users.toArray();
-//     }
-//   }
-// }
+// PORT
+const PORT = process.env.PORT || 4000;
 
-// const server = new ApolloServer({
-//     typeDefs,
-//     resolvers,
-//   });
-  
+// Routes
+app.use(require('./routes'));
 
-// const { url } = await startStandaloneServer(server, {
-// listen: { port: 4000 },
-// });
-  
-// console.log(`🚀  Server ready at: ${url}`);
+// Listener
+connectToMongoDB(() => {
+    app.listen(PORT, () => {
+        console.log('The server is up 🚀 and running on port', PORT);
+    })
+});
