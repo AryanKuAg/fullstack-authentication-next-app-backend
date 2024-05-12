@@ -6,9 +6,17 @@ const { ObjectId } = require("mongodb");
 router.get("/users",authMiddleware, async (req, res, next) => {
   const client = getClient();
   const collection = client.db("users_db").collection("users");
-
+  const pipeline = [
+    {
+      $project: {
+        _id: 1, 
+        username: 1, 
+        firstName: 1,
+      },
+    },
+  ];
   try {
-    const users = await collection.find({}).toArray();
+    const users = await collection.aggregate(pipeline).toArray();
     console.log(users)
     return res.json({users});
   } catch (err) {
