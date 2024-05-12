@@ -17,7 +17,6 @@ router.get("/users",authMiddleware, async (req, res, next) => {
   ];
   try {
     const users = await collection.aggregate(pipeline).toArray();
-    console.log(users)
     return res.json({users});
   } catch (err) {
     return res
@@ -81,7 +80,14 @@ router.post("/register", async function (req, res, next) {
 
   const client = getClient();
   const collection = client.db("users_db").collection("users");
+
   try {
+    // Checking for unique emails
+    let duplicateUser = await collection.findOne({email: req.body.email});
+    if(duplicateUser) {
+      throw new Error("The user already exists with a duplicate email id");
+    }
+
     delete req.body.password;
     delete req.body.terms;
 
@@ -102,7 +108,7 @@ router.post("/register", async function (req, res, next) {
 
   } catch (err) {
     console.log(err)
-    res.json({ success: false, msg: err });
+    res.status(500).json({ success: false, msg: err.message });
   }
 });
 
